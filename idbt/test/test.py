@@ -1,0 +1,2 @@
+from idbt import DbtProject
+

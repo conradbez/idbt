@@ -1,0 +1,7 @@
+
+version: 2
+sources:
+  - name: data  
+    schema: main
+    tables:
+      - name: data

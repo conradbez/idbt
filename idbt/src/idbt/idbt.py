@@ -102,9 +102,11 @@ class DbtProject:
             n.type, # template name is just the model type atm
             ) for n in user_inputted_nodes]
     
-    def run_project(self):
+    def run_project(self, clean_targets=True):
         cli_args = ["run",] + DBT_CLI_ARGS
         res: dbtRunnerResult = dbt.invoke(cli_args)
+        if clean_targets:
+            clean_res: dbtRunnerResult = dbt.invoke(["clean",] + DBT_CLI_ARGS)
         return res
 
     def run_seed(self):

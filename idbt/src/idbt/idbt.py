@@ -1,15 +1,26 @@
 # A python script that takes a diagram dict and builds a dbt project with these classes
-from typing import Literal, List, Dict, get_args
+from typing import Any, Literal, List, Dict, get_args
 from dbt.cli.main import dbtRunner, dbtRunnerResult
 from mako.template import Template
 import os
 import glob
 from pathlib import Path
+import duckdb
+
 DBT_PROJECT_NAME = 'dbt_project'
 IDBT_DIR = os.path.dirname(os.path.abspath(__file__))
-DBT_CLI_ARGS =  ["--project-dir", f"{IDBT_DIR}/dbt_project", "--profiles-dir", IDBT_DIR]
+DUCK_DB_PATH = str(IDBT_DIR + "/idbt.duckdb")
+
+DBT_CLI_ARGS =  [
+    "--vars",
+    "{IDBT_DUCKDB_PATH: IDBT_DIR}".replace('IDBT_DIR', str(DUCK_DB_PATH)), # set duckdb path
+    "--project-dir", 
+    f"{IDBT_DIR}/dbt_project", 
+    "--profiles-dir", 
+    IDBT_DIR]
 IDBT_MODEL_DIR = os.path.join(IDBT_DIR, 'dbt_project', 'models', 'idbt',)
-print(IDBT_DIR)
+os.environ['DBT_PROFILES_DIR'] = str(IDBT_DIR) + '/idbt.duckdb'
+
 dbt = dbtRunner()
 
 TEMPLATE_NAMES = [os.path.splitext(os.path.basename(f))[0] for f in glob.glob("/Users/conrad/idbt2/idbt/src/idbt/templates/*", )]
@@ -67,30 +78,45 @@ class DbtModel:
             # translate the node inputs
             self.modelParamProcessing = modelParamProcessingOverride()
     
+    def get_df(self, method: Literal['df', 'show', 'fetchall'] = 'show'):
+        con = duckdb.connect(DUCK_DB_PATH)
+        res = con.sql(f"SELECT * from {self.node.name}")
+        return res.__getattribute__(method)()
+
     def get_columns(self):
         # Implementation to get columns
         pass
 
     def compile(self):
-        # Delete previous run models
-        previous_run_sql_files = glob.glob(str(IDBT_MODEL_DIR) + '/*sql')
-        for previous_run_sql_file in previous_run_sql_files:
-            os.remove(previous_run_sql_file)
         # Implementation to compile model
         template_path = os.path.join(IDBT_DIR, 'templates', f'{self.template_name}.sql')
         with open(template_path, "r") as file:
             template_content = file.read()
+            print(self.node.name)
             compiled_sql = Template(template_content).render(**self.modelParamProcessing(node=self.node))
             
         compiled_sql_file_path = os.path.join(IDBT_MODEL_DIR, f'{self.node.name}.sql')
+        print(compiled_sql_file_path)
+        print(compiled_sql)
         with open(compiled_sql_file_path, "w", ) as file:
             file.write(compiled_sql)
 
 class DbtProject:
     def __init__(self,  user_inputted_nodes: List[Node]):
+        # Delete previous run models
+        # previous_run_sql_files = glob.glob(str(IDBT_MODEL_DIR) + '/*sql')
+        # for previous_run_sql_file in previous_run_sql_files:
+        #     os.remove(previous_run_sql_file)
+
         self.user_inputted_nodes = user_inputted_nodes
         self.yaml_template = None
         self.dbt_models = self.generate_model_list(user_inputted_nodes) 
+        
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        self.run_seed()
+        self.compile_models()
+        res: dbtRunnerResult = self.run_project()
+        return res
 
     def generate_model_list(self, user_inputted_nodes: ListOfNodes) -> ListOfNodes:
         len_inputted = len(user_inputted_nodes)

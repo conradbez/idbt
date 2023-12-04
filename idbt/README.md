@@ -10,6 +10,11 @@
 - [Installation](#installation)
 - [License](#license)
 
+## Todo
+
+- sort out the paths of where dbt_project is created
+- get a table back into python
+
 ## Run
 
 `pipx run poetry shell`

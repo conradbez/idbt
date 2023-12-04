@@ -3,4 +3,4 @@ dbt_project:
   outputs:
     dev:
       type: duckdb
-      path: './idbt.duckdb'
+      path: "{{ var('IDBT_DUCKDB_PATH') }}"

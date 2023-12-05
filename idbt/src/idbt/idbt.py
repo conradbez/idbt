@@ -6,24 +6,10 @@ import os
 import glob
 from pathlib import Path
 import duckdb
-
-DBT_PROJECT_NAME = 'dbt_project'
-IDBT_DIR = os.path.dirname(os.path.abspath(__file__))
-DUCK_DB_PATH = str(IDBT_DIR + "/idbt.duckdb")
-
-DBT_CLI_ARGS =  [
-    "--vars",
-    "{IDBT_DUCKDB_PATH: IDBT_DIR}".replace('IDBT_DIR', str(DUCK_DB_PATH)), # set duckdb path
-    "--project-dir", 
-    f"{IDBT_DIR}/dbt_project", 
-    "--profiles-dir", 
-    IDBT_DIR]
-IDBT_MODEL_DIR = os.path.join(IDBT_DIR, 'dbt_project', 'models', 'idbt',)
-os.environ['DBT_PROFILES_DIR'] = str(IDBT_DIR) + '/idbt.duckdb'
+from idbt.settings import IDBT_DIR, DUCK_DB_PATH, DBT_CLI_ARGS, IDBT_MODEL_DIR, TEMPLATE_NAMES, DATA_SOURCE_NAMES
 
 dbt = dbtRunner()
 
-TEMPLATE_NAMES = [os.path.splitext(os.path.basename(f))[0] for f in glob.glob("/Users/conrad/idbt2/idbt/src/idbt/templates/*", )]
 NodeTypeLiteral = Literal['append', 'merge', 'select', 'filter']
 
 class Node:

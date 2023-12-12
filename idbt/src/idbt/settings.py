@@ -12,7 +12,11 @@ DBT_CLI_ARGS =  [
     "--project-dir", 
     f"{IDBT_DIR}/{DBT_PROJECT_NAME}", 
     "--profiles-dir", 
-    IDBT_DIR]
+    IDBT_DIR,
+    "--threads",
+    "1", # set thread to one to test dependent models not executing in order 
+    ]
+DELTA_RUN_CLI_ARGS =  ["--defer", "--state", "prod-run-artifacts"]
 IDBT_MODEL_DIR = os.path.join(IDBT_DIR, DBT_PROJECT_NAME, 'models', 'idbt',)
 os.environ['DBT_PROFILES_DIR'] = str(IDBT_DIR) + '/idbt.duckdb'
 

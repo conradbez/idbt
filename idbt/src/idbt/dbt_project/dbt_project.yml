@@ -20,4 +20,4 @@ clean-targets:
 models:
   dbt_project:
     idbt:
-      +materialized: view
+      +materialized: table

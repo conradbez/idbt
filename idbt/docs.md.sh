@@ -1,0 +1,3 @@
+dbt docs generate --vars '{IDBT_DUCKDB_PATH: /Users/conrad/idbt2/idbt/src/idbt/idbt.duckdb}' --project-dir '/Users/conrad/idbt2/idbt/src/idbt/dbt_project' --profiles-dir '/Users/conrad/idbt2/idbt/src/idbt'
+
+dbt docs serve --vars '{IDBT_DUCKDB_PATH: /Users/conrad/idbt2/idbt/src/idbt/idbt.duckdb}' --project-dir '/Users/conrad/idbt2/idbt/src/idbt/dbt_project' --profiles-dir '/Users/conrad/idbt2/idbt/src/idbt'
